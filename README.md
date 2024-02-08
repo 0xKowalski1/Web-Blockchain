@@ -1,0 +1,1 @@
+A simple blockchain, similiar to Karpathys Micrograd, but for blockchains
