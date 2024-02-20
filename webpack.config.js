@@ -16,6 +16,21 @@ module.exports = {
           loader: "babel-loader",
         },
       },
+      {
+        test: /\.css$/,
+        use: [
+          "style-loader", // Injects CSS into the DOM via a <style> tag
+          "css-loader", // Translates CSS into CommonJS modules
+          {
+            loader: "postcss-loader", // Process CSS with PostCSS
+            options: {
+              postcssOptions: {
+                plugins: [require("tailwindcss"), require("autoprefixer")],
+              },
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [

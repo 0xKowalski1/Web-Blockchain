@@ -2,17 +2,13 @@ import Blockchain from "./Blockchain";
 import Worker from "workerize-loader!./MiningNode.worker";
 
 class MiningNode {
-  constructor({ id, miningNetwork, setMiningNode }) {
+  constructor({ id, miningNetwork, addBlockToNode }) {
     this.id = id;
     this.blockchain = new Blockchain();
     this.miningNetwork = miningNetwork;
-
-    //Web worker stuff
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-    this.setMiningNode = setMiningNode;
-
-    this.receiving = false;
+    this.addBlockToNode = addBlockToNode;
   }
 
   mine() {
@@ -25,9 +21,9 @@ class MiningNode {
   handleWorkerMessage(event) {
     const { action, block } = event.data;
     if (action === "MINED" && !this.receiving) {
-      this.miningNetwork.broadcastBlock({ block, originNodeId: this.id });
+      this.miningNetwork.broadcastBlock({ block, nodeId: this.id });
       this.blockchain.addBlock(block);
-      this.setMiningNode(this);
+      this.addBlockToNode({ nodeId: this.id, newChain: this.blockchain.chain });
       this.mine();
     }
   }
@@ -38,7 +34,7 @@ class MiningNode {
     this.miningWebWorker.terminate();
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-    this.setMiningNode(this);
+    this.addBlockToNode({ nodeId: this.id, newChain: this.blockchain.chain });
 
     this.mine();
   }

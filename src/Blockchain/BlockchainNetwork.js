@@ -1,10 +1,10 @@
 import MiningNode from "./MiningNode";
 
 class BlockchainNetwork {
-  constructor({ miningNodeCount, setMiningNode }) {
+  constructor({ miningNodeCount, addBlockToNode }) {
     this.miningNodes = Array.from(
       { length: miningNodeCount },
-      (_, id) => new MiningNode({ id, miningNetwork: this, setMiningNode })
+      (_, id) => new MiningNode({ id, miningNetwork: this, addBlockToNode })
     );
   }
 
@@ -12,10 +12,14 @@ class BlockchainNetwork {
     this.miningNodes.forEach((node) => node.mine());
   }
 
-  broadcastBlock({ block, originNodeId }) {
+  broadcastBlock({ block, nodeId }) {
     this.miningNodes.forEach(
-      (node) => node.id !== originNodeId && node.receiveBlock(block)
+      (node) => node.id !== nodeId && node.receiveBlock(block)
     );
+  }
+
+  cleanup() {
+    this.miningNodes.forEach((node) => node.miningWebWorker.terminate());
   }
 }
 
