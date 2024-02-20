@@ -1,15 +1,14 @@
 import MiningNode from "./MiningNode";
 
 class BlockchainNetwork {
-  constructor(miningNodeCount) {
+  constructor({ miningNodeCount, setMiningNode }) {
     this.miningNodes = Array.from(
       { length: miningNodeCount },
-      (_, id) => new MiningNode({ id, miningPool: this })
+      (_, id) => new MiningNode({ id, miningNetwork: this, setMiningNode })
     );
   }
 
   init() {
-    console.log(this.miningNodes);
     this.miningNodes.forEach((node) => node.mine());
   }
 

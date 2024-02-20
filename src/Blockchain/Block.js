@@ -5,12 +5,12 @@ const GENESISBLOCK = {
   data: "GENESIS_DATA",
   lastHash: "-",
   hash: "GENESIS_HASH",
-  timestamp: 1,
+  timestamp: Date.now(),
   nonce: 1,
-  difficulty: 3,
+  difficulty: 1,
 };
 
-const MINERATE = 5000;
+const MINERATE = 10000;
 
 class Block {
   constructor({ lastHash, hash, timestamp, nonce, difficulty }) {
@@ -23,11 +23,11 @@ class Block {
 
   static genesisBlock = () => new Block(GENESISBLOCK);
 
-  static mineBlock(lastBlock) {
+  static async mineBlock(lastBlock) {
     const lastHash = lastBlock.hash;
     let difficulty = lastBlock.difficulty;
     let hash, timestamp;
-    let nonce = 0;
+    let nonce = 1;
 
     do {
       nonce++;
@@ -35,15 +35,13 @@ class Block {
 
       const difference = timestamp - lastBlock.timestamp;
 
-      if (difficulty < 1) {
-        difficulty = 1;
-      } else if (difference > MINERATE) {
-        difficulty--;
+      if (difference > MINERATE) {
+        difficulty = Math.max(1, difficulty - 1);
       } else {
         difficulty++;
       }
 
-      hash = cryptoHash(lastHash, nonce, difficulty, timestamp);
+      hash = await cryptoHash(lastHash, nonce, difficulty, timestamp);
     } while (
       hexToBinary(hash).substring(0, difficulty) !== "0".repeat(difficulty)
     );

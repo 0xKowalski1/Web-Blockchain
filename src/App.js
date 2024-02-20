@@ -1,7 +1,6 @@
-import * as React from "react";
+import React from "react";
 import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import RootPage from "./pages/Root.page";
-import BlockchainNetwork from "./Blockchain/BlockchainNetwork";
 
 const router = createBrowserRouter([
   {
@@ -11,8 +10,6 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  const blockchainNetwork = new BlockchainNetwork(3);
-
   return <RouterProvider router={router} />;
 };
 

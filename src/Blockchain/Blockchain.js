@@ -1,15 +1,13 @@
 import Block from "./Block";
 
 class Blockchain {
-  constructor() {
-    this.chain = [Block.genesisBlock()];
+  constructor(chain) {
+    this.chain = chain ? chain : [Block.genesisBlock()];
   }
 
-  addBlock = () => {
-    const lastBlock = this.chain[this.chain.length - 1];
+  lastBlock = () => this.chain[this.chain.length - 1];
 
-    const newBlock = Block.mineBlock(lastBlock);
-
+  addBlock = async (newBlock) => {
     this.chain = [...this.chain, newBlock];
 
     return newBlock;

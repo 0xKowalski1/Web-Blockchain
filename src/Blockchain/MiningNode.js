@@ -1,25 +1,46 @@
 import Blockchain from "./Blockchain";
-import hexToBinary from "hex-to-binary";
+import Worker from "workerize-loader!./MiningNode.worker";
 
 class MiningNode {
-  constructor({ id, miningPool }) {
+  constructor({ id, miningNetwork, setMiningNode }) {
     this.id = id;
     this.blockchain = new Blockchain();
-    this.miningPool = miningPool;
-    //miner wallet
+    this.miningNetwork = miningNetwork;
+
+    //Web worker stuff
+    this.miningWebWorker = new Worker();
+    this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
+    this.setMiningNode = setMiningNode;
+
+    this.receiving = false;
   }
 
   mine() {
-    do {
-      let block = this.blockchain.addBlock();
-      console.log("new block: ", block.difficulty, hexToBinary(block.hash));
+    this.miningWebWorker.postMessage({
+      action: "MINE",
+      lastBlock: this.blockchain.lastBlock(),
+    });
+  }
 
-      this.miningPool.broadcastBlock({ block, id: this.id });
-    } while (true);
+  handleWorkerMessage(event) {
+    const { action, block } = event.data;
+    if (action === "MINED" && !this.receiving) {
+      this.miningNetwork.broadcastBlock({ block, originNodeId: this.id });
+      this.blockchain.addBlock(block);
+      this.setMiningNode(this);
+      this.mine();
+    }
   }
 
   receiveBlock(block) {
-    console.log(this.id, " recieved new block: ", block.hash);
+    this.blockchain.addBlock(block);
+
+    this.miningWebWorker.terminate();
+    this.miningWebWorker = new Worker();
+    this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
+    this.setMiningNode(this);
+
+    this.mine();
   }
 }
 
