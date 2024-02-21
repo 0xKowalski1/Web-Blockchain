@@ -1,5 +1,6 @@
 import Blockchain from "./Blockchain";
-import Worker from "workerize-loader!./MiningNode.worker";
+import Transaction from "./Transaction";
+import Worker from "workerize-loader!./MiningNode.worker.js";
 
 class MiningNode {
   constructor({ id, miningNetwork, addBlockToNode }) {
@@ -12,18 +13,31 @@ class MiningNode {
   }
 
   mine() {
+    const validTransactions =
+      this.miningNetwork.transactionPool.validTransactions();
+    const rewardTransaction = Transaction.rewardTransaction("mineraddress");
+
     this.miningWebWorker.postMessage({
       action: "MINE",
       lastBlock: this.blockchain.lastBlock(),
+      //Web workers are picky about what data types you give them
+      transactions: JSON.parse(
+        JSON.stringify({
+          ...validTransactions,
+          [rewardTransaction.id]: rewardTransaction,
+        })
+      ),
     });
   }
 
   handleWorkerMessage(event) {
     const { action, block } = event.data;
-    if (action === "MINED" && !this.receiving) {
+
+    if (action === "MINED") {
       this.miningNetwork.broadcastBlock({ block, nodeId: this.id });
       this.blockchain.addBlock(block);
       this.addBlockToNode({ nodeId: this.id, newChain: this.blockchain.chain });
+      this.miningNetwork.transactionPool.removeTransactions(block.transactions);
       this.mine();
     }
   }

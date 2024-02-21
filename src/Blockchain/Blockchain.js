@@ -7,11 +7,7 @@ class Blockchain {
 
   lastBlock = () => this.chain[this.chain.length - 1];
 
-  addBlock = async (newBlock) => {
-    this.chain = [...this.chain, newBlock];
-
-    return newBlock;
-  };
+  addBlock = async (newBlock) => (this.chain = [...this.chain, newBlock]);
 }
 
 export default Blockchain;

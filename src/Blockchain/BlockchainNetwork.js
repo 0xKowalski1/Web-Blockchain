@@ -1,4 +1,5 @@
 import MiningNode from "./MiningNode";
+import TransactionPool from "./TransactionPool";
 
 class BlockchainNetwork {
   constructor({ miningNodeCount, addBlockToNode }) {
@@ -6,6 +7,7 @@ class BlockchainNetwork {
       { length: miningNodeCount },
       (_, id) => new MiningNode({ id, miningNetwork: this, addBlockToNode })
     );
+    this.transactionPool = new TransactionPool();
   }
 
   init() {
@@ -16,6 +18,10 @@ class BlockchainNetwork {
     this.miningNodes.forEach(
       (node) => node.id !== nodeId && node.receiveBlock(block)
     );
+  }
+
+  addTransaction(transaction) {
+    this.transactionPool.addTransaction(transaction);
   }
 
   cleanup() {

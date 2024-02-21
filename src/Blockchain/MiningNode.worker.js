@@ -1,10 +1,10 @@
 import Block from "./Block";
 
 onmessage = async function (e) {
-  const { action, lastBlock } = e.data;
+  const { action, lastBlock, transactions } = e.data;
 
   if (action === "MINE") {
-    const block = await Block.mineBlock(lastBlock);
+    const block = await Block.mineBlock({ lastBlock, transactions });
 
     postMessage({
       action: "MINED",
