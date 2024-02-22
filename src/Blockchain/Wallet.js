@@ -21,7 +21,7 @@ class Wallet {
       this.keyPair.publicKey
     );
 
-    this.publicKey = "0x" + bufferToHex(publicKey);
+    this.publicKey = bufferToHex(publicKey);
   }
 
   async signTransaction(transaction) {

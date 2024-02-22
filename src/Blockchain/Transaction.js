@@ -1,4 +1,5 @@
 import { REWARDADDRESS, REWARDAMOUNT } from "./config";
+import hexToBuffer from "./utillities/hexToBuffer";
 
 const { v1: uuidv1 } = require("uuid");
 
@@ -12,7 +13,7 @@ class Transaction {
 
     this.data = data || "";
 
-    if (!value) throw new Error("No 'value'!"); //no 0 values either
+    if (!value) throw new Error("No 'value'!");
     this.value = value;
 
     this.timestamp = timestamp || new Date();
@@ -28,9 +29,41 @@ class Transaction {
     });
 
   //Instance Methods
-  validTransaction = () => {
-    //hard
-    return true;
+  validTransaction = async () => {
+    if (this.from === REWARDADDRESS) return true; //validated in run transactions
+    if (!this.signature) return false;
+
+    const publicKey = await window.crypto.subtle.importKey(
+      "raw",
+      hexToBuffer(this.from),
+      {
+        name: "ECDSA",
+        namedCurve: "P-256",
+      },
+      true,
+      ["verify"]
+    );
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(JSON.stringify({ ...this, signature: null }));
+
+    const signatureBuffer = hexToBuffer(this.signature);
+
+    try {
+      const isValid = await window.crypto.subtle.verify(
+        {
+          name: "ECDSA",
+          hash: { name: "SHA-256" },
+        },
+        publicKey,
+        signatureBuffer,
+        data
+      );
+
+      return isValid;
+    } catch (error) {
+      return false;
+    }
   };
 }
 

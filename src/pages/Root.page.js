@@ -13,7 +13,7 @@ const RootPage = () => {
     const transaction = new Transaction({
       to: miningNodes[0].minerWallet.publicKey,
       from: wallet.publicKey,
-      value: 2000,
+      value: 500,
     });
 
     const signature = await wallet.signTransaction(transaction);

@@ -20,12 +20,12 @@ class TransactionPool {
     );
   }
 
-  validTransactions() {
+  async validTransactions() {
     const validTransactions = {};
 
     for (const transactionId in this.transactions) {
       const transaction = new Transaction(this.transactions[transactionId]);
-      const validTransaction = transaction.validTransaction();
+      const validTransaction = await transaction.validTransaction();
 
       if (validTransaction) {
         validTransactions[transactionId] = transaction;

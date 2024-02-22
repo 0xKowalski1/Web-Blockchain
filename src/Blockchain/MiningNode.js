@@ -22,9 +22,10 @@ class MiningNode {
     this.mine();
   }
 
-  mine() {
+  async mine() {
+    console.log("Miner: " + this.id + " is mining.");
     const initialValidTransactions =
-      this.miningNetwork.transactionPool.validTransactions();
+      await this.miningNetwork.transactionPool.validTransactions();
     const rewardTransaction = Transaction.rewardTransaction(
       this.minerWallet.publicKey
     );
@@ -52,6 +53,8 @@ class MiningNode {
     const { action, block } = event.data;
 
     if (action === "MINED") {
+      console.log("Miner: " + this.id + " found new block, broadcasting...");
+
       this.miningNetwork.broadcastBlock({ block, nodeId: this.id });
       this.blockchain.addBlock(block);
 
@@ -65,12 +68,22 @@ class MiningNode {
     }
   }
 
-  receiveBlock(block) {
+  async receiveBlock(block) {
+    console.log("Miner: " + this.id + " recieved a new block.");
+
     let validBlock = true;
 
     for (const transactionId in block.transactions) {
       const transaction = new Transaction(block.transactions[transactionId]);
-      if (!transaction.validTransaction()) {
+      if (!(await transaction.validTransaction())) {
+        console.log(
+          "Miner: " +
+            this.id +
+            " found new block: " +
+            block.hash +
+            " to be invalid due to ",
+          transaction
+        );
         validBlock = false;
         return;
       }
@@ -81,6 +94,14 @@ class MiningNode {
     );
 
     if (Object.keys(invalidTransactions).length) {
+      console.log(
+        "Miner: " +
+          this.id +
+          " found new block: " +
+          block.hash +
+          " to be invalid due to invalid transactions",
+        invalidTransactions
+      );
       validBlock = false;
       return;
     }
