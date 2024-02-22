@@ -71,8 +71,6 @@ class MiningNode {
   async receiveBlock(block) {
     console.log("Miner: " + this.id + " recieved a new block.");
 
-    let validBlock = true;
-
     for (const transactionId in block.transactions) {
       const transaction = new Transaction(block.transactions[transactionId]);
       if (!(await transaction.validTransaction())) {
@@ -84,7 +82,6 @@ class MiningNode {
             " to be invalid due to ",
           transaction
         );
-        validBlock = false;
         return;
       }
     }
@@ -102,27 +99,23 @@ class MiningNode {
           " to be invalid due to invalid transactions",
         invalidTransactions
       );
-      validBlock = false;
       return;
     }
 
-    if (validBlock) {
-      //Wont be hit if block invalid, but just incase
-      this.blockchain.addBlock(block);
+    this.blockchain.addBlock(block);
 
-      this.miningWebWorker.terminate();
-      this.miningWebWorker = new Worker();
-      this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-      this.addBlockToNode({
-        nodeId: this.id,
-        newChain: this.blockchain.chain,
-      });
+    this.miningWebWorker.terminate();
+    this.miningWebWorker = new Worker();
+    this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
+    this.addBlockToNode({
+      nodeId: this.id,
+      newChain: this.blockchain.chain,
+    });
 
-      this.state.stateMap = newState;
-      this.newState = {};
+    this.state.stateMap = newState;
+    this.newState = {};
 
-      this.mine();
-    }
+    this.mine();
   }
 }
 
