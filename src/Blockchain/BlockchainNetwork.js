@@ -11,7 +11,7 @@ class BlockchainNetwork {
   }
 
   init() {
-    this.miningNodes.forEach((node) => node.mine());
+    this.miningNodes.forEach((node) => node.init());
   }
 
   broadcastBlock({ block, nodeId }) {

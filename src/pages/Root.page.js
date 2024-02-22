@@ -8,10 +8,11 @@ const RootPage = () => {
   const [miningNodes, setMiningNodes] = React.useState({});
   const [blockchainNetwork, setBlockchainNetwork] = React.useState(null);
 
-  const newTransaction = async (minerWallet = "dog") => {
+  const newTransaction = async () => {
+    console.log(wallet, miningNodes[0]);
     const transaction = new Transaction({
-      to: minerWallet,
-      from: await wallet.publicKey(true),
+      to: miningNodes[0].minerWallet.publicKey,
+      from: wallet.publicKey,
       value: 2000,
     });
 

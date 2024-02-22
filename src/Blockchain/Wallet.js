@@ -1,18 +1,9 @@
-function bufferToHex(buffer) {
-  return [...new Uint8Array(buffer)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function hexToBuffer(hexString) {
-  return new Uint8Array(
-    hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
-  ).buffer;
-}
+import bufferToHex from "./utillities/bufferToHex";
 
 class Wallet {
-  constructor(keyPair) {
-    this.keyPair = keyPair || null;
+  constructor() {
+    this.keyPair = null;
+    this.publicKey = null;
   }
 
   async generateKeyPair() {
@@ -24,19 +15,13 @@ class Wallet {
       true,
       ["sign", "verify"]
     );
-  }
 
-  async publicKey(hex = false) {
     const publicKey = await window.crypto.subtle.exportKey(
       "raw",
       this.keyPair.publicKey
     );
 
-    if (hex) {
-      return bufferToHex(publicKey);
-    } else {
-      return publicKey;
-    }
+    this.publicKey = "0x" + bufferToHex(publicKey);
   }
 
   async signTransaction(transaction) {

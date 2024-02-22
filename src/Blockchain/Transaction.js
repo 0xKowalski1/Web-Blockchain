@@ -1,3 +1,5 @@
+import { REWARDADDRESS, REWARDAMOUNT } from "./config";
+
 const { v1: uuidv1 } = require("uuid");
 
 class Transaction {
@@ -20,9 +22,9 @@ class Transaction {
   //Static Methods
   static rewardTransaction = (to) =>
     new Transaction({
-      from: "---rewardaddressmakemeaconstant---",
+      from: REWARDADDRESS,
       to,
-      value: 1000,
+      value: REWARDAMOUNT,
     });
 
   //Instance Methods

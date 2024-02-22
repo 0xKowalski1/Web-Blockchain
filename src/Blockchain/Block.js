@@ -1,17 +1,6 @@
 import hexToBinary from "hex-to-binary";
 import cryptoHash from "./utillities/cryptoHash";
-
-const GENESISBLOCK = {
-  data: "GENESIS_DATA",
-  lastHash: "-",
-  hash: "GENESIS_HASH",
-  timestamp: Date.now(),
-  nonce: 1,
-  difficulty: 1,
-  transactions: {},
-};
-
-const MINERATE = 10000;
+import { GENESISBLOCK, MINERATE } from "./config";
 
 class Block {
   constructor({ lastHash, hash, timestamp, nonce, difficulty, transactions }) {
