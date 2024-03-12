@@ -5,13 +5,12 @@ import Wallet from "./Wallet";
 import State from "./State";
 
 class MiningNode {
-  constructor({ id, miningNetwork, addBlockToNode }) {
+  constructor({ id, miningNetwork }) {
     this.id = id;
     this.blockchain = new Blockchain();
     this.miningNetwork = miningNetwork;
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-    this.addBlockToNode = addBlockToNode;
     this.minerWallet = new Wallet();
     this.state = new State();
     this.newState = {};
@@ -58,7 +57,10 @@ class MiningNode {
       this.miningNetwork.broadcastBlock({ block, nodeId: this.id });
       this.blockchain.addBlock(block);
 
-      this.addBlockToNode({ nodeId: this.id, newChain: this.blockchain.chain });
+      this.miningNetwork.refreshNodeChain({
+        nodeId: this.id,
+        newChain: this.blockchain.chain,
+      });
       this.miningNetwork.transactionPool.removeTransactions(block.transactions);
 
       this.state.stateMap = this.newState;
@@ -107,7 +109,7 @@ class MiningNode {
     this.miningWebWorker.terminate();
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-    this.addBlockToNode({
+    this.miningNetwork.refreshNodeChain({
       nodeId: this.id,
       newChain: this.blockchain.chain,
     });
