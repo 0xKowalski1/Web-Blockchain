@@ -2,13 +2,13 @@ import MiningNode from "./MiningNode";
 import TransactionPool from "./TransactionPool";
 
 class BlockchainNetwork {
-  constructor({ miningNodeCount, refreshNodeChain }) {
+  constructor({ miningNodeCount, setBlockchainNetwork }) {
     this.miningNodes = Array.from(
       { length: miningNodeCount },
       (_, id) => new MiningNode({ id, miningNetwork: this })
     );
     this.transactionPool = new TransactionPool();
-    this.refreshNodeChain = refreshNodeChain;
+    this.setBlockchainNetwork = setBlockchainNetwork;
   }
 
   init() {

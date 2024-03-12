@@ -7,7 +7,8 @@ import State from "./State";
 class MiningNode {
   constructor({ id, miningNetwork }) {
     this.id = id;
-    this.blockchain = new Blockchain();
+    const chain = miningNetwork.miningNodes ? miningNetwork.miningNodes[0].blockchain.chain : null;
+    this.blockchain = new Blockchain(chain);
     this.miningNetwork = miningNetwork;
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
@@ -57,10 +58,7 @@ class MiningNode {
       this.miningNetwork.broadcastBlock({ block, nodeId: this.id });
       this.blockchain.addBlock(block);
 
-      this.miningNetwork.refreshNodeChain({
-        nodeId: this.id,
-        newChain: this.blockchain.chain,
-      });
+      this.miningNetwork.setBlockchainNetwork(this.miningNetwork);
       this.miningNetwork.transactionPool.removeTransactions(block.transactions);
 
       this.state.stateMap = this.newState;
@@ -109,10 +107,7 @@ class MiningNode {
     this.miningWebWorker.terminate();
     this.miningWebWorker = new Worker();
     this.miningWebWorker.onmessage = this.handleWorkerMessage.bind(this);
-    this.miningNetwork.refreshNodeChain({
-      nodeId: this.id,
-      newChain: this.blockchain.chain,
-    });
+    this.miningNetwork.setBlockchainNetwork(this.miningNetwork);
 
     this.state.stateMap = newState;
     this.newState = {};

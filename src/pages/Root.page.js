@@ -10,13 +10,12 @@ const RootPage = () => {
   const maxThreads = window.navigator.hardwareConcurrency;
   const [miningNodeCount, setMiningNodeCount] = React.useState(1);
   const [wallet, setWallet] = React.useState(null);
-  const [miningNodes, setMiningNodes] = React.useState({});
   const [blockchainNetwork, setBlockchainNetwork] = React.useState(null);
 
   const newTransaction = async () => {
-    console.log(wallet, miningNodes[0]);
+    console.log(wallet, blockchainNetwork.miningNodes[0]);
     const transaction = new Transaction({
-      to: miningNodes[0].minerWallet.publicKey,
+      to: blockchainNetwork.miningNodes[0].minerWallet.publicKey,
       from: wallet.publicKey,
       value: 500,
     });
@@ -27,23 +26,6 @@ const RootPage = () => {
     blockchainNetwork.addTransaction(transaction);
   };
 
-  const refreshNodeChain = ({ nodeId, newChain }) => {
-    setMiningNodes((currentNodes) => {
-      return {
-        ...currentNodes,
-        [nodeId]: {
-          ...currentNodes[nodeId],
-          blockchain: {
-            ...currentNodes[nodeId].blockchain,
-            chain: newChain,
-          },
-        },
-      };
-    });
-  };
-
-  React.useEffect(() => {}, []);
-
   React.useEffect(() => {
     const run = async () => {
       const newWallet = new Wallet();
@@ -52,19 +34,13 @@ const RootPage = () => {
 
       const newBlockChainNetwork = new BlockchainNetwork({
         miningNodeCount: 1,
-        refreshNodeChain,
+        setBlockchainNetwork,
       });
 
       newBlockChainNetwork.init();
 
       setBlockchainNetwork(newBlockChainNetwork);
 
-      setMiningNodes(
-        newBlockChainNetwork.miningNodes.reduce((acc, miningNode) => {
-          acc[miningNode.id] = miningNode;
-          return acc;
-        }, {})
-      );
     };
     run();
 
@@ -78,6 +54,7 @@ const RootPage = () => {
     ) {
       return; // Do nothing
     }
+      console.log(blockchainNetwork);
     blockchainNetwork.changeMiningNodeCount(changeNum);
   };
 
@@ -95,15 +72,15 @@ const RootPage = () => {
       {/* <button onClick={() => newTransaction()}>Send Transaction</button> */}
 
       <div>
-        {Object.keys(miningNodes).length ? (
-          Object.keys(miningNodes).map((miningNodeId) => (
-            <div key={miningNodeId + "-miningNode"}>
-              <h2>Mining Node Id: {miningNodeId}</h2>
+        {blockchainNetwork && blockchainNetwork.miningNodes ? (
+          blockchainNetwork.miningNodes.map((miningNode) => (
+            <div key={miningNode.id + "-miningNode"}>
+              <h2>Mining Node Id: {miningNode.id}</h2>
               <div>
-                {miningNodes[miningNodeId].blockchain.chain.map((block) => (
+                {miningNode.blockchain.chain.map((block) => (
                   <BlockchainCard
-                    key={miningNodeId + "-" + block.hash}
-                    miningNodeId={miningNodeId}
+                    key={miningNode.id + "-" + block.hash}
+                    miningNodeId={miningNode.id}
                     {...block}
                   />
                 ))}
